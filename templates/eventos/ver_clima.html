@@ -1,0 +1,19 @@
+{% extends 'eventos/base.html' %}
+{% block title %}Clima del Evento{% endblock %}
+
+{% block content %}
+<h2>Clima para: {{ evento.titulo }}</h2>
+<p><strong>Ubicación:</strong> {{ evento.ubicacion }}</p>
+
+{% if clima %}
+    <ul class="list-group">
+        <li class="list-group-item">🌡️ Temperatura: {{ clima.temperature }} °C</li>
+        <li class="list-group-item">💨 Viento: {{ clima.windspeed }} km/h</li>
+        <li class="list-group-item">🧭 Dirección del viento: {{ clima.winddirection }}°</li>
+    </ul>
+{% else %}
+    <div class="alert alert-warning mt-3">No se pudo obtener el clima.</div>
+{% endif %}
+
+<a href="{% url 'lista_eventos' %}" class="btn btn-secondary mt-3">Volver</a>
+{% endblock %}

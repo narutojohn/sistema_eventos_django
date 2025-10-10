@@ -1,0 +1,304 @@
+{% extends 'eventos/base.html' %}
+{% load static %}
+{% block title %}Inicio - Eventos{% endblock %}
+
+{% block content %}
+
+<!-- 🔽 NUEVA SECCIÓN DE QUIÉNES SOMOS -->
+<section class="container my-5">
+  <h2 class="text-center mb-4">🌟 ¿Quiénes Somos?</h2>
+  <div class="row align-items-center">
+    <div class="col-md-5 mb-4 mb-md-0">
+      <img src="{% static 'img/evento4.jpg' %}" class="img-fluid rounded shadow" alt="Institución o visión">
+    </div>
+    <div class="col-md-7">
+      <div class="row g-3">
+        <div class="col-12">
+          <div class="card border-success shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title text-success">🎯 Misión</h5>
+              <p class="card-text">
+                Brindar una plataforma eficiente para la organización, promoción y participación en eventos académicos, fortaleciendo la comunicación entre estudiantes, docentes e instituciones.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="card border-primary shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title text-primary">🚀 Visión</h5>
+              <p class="card-text">
+                Ser la herramienta académica líder en gestión de eventos educativos, reconocida por su accesibilidad, innovación y capacidad de integrar a toda la comunidad académica.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="card border-dark shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title text-dark">📌 Objetivo</h5>
+              <p class="card-text">
+                Facilitar a los usuarios la visualización, registro y seguimiento de eventos académicos de forma intuitiva, confiable y centralizada.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- 🔼 FIN DE SECCIÓN -->
+
+<div class="container mt-4">
+  <h2 class="text-center mb-4">🎉 Eventos disponibles</h2>
+  <div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for evento in eventos %}
+      <div class="col">
+        <div class="card card-evento h-100 shadow-sm">
+          {% if evento.imagen %}
+            <img src="{{ evento.imagen.url }}" class="card-img-top" alt="{{ evento.titulo }}">
+          {% endif %}
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ evento.titulo }}</h5>
+            <p class="card-text">{{ evento.descripcion|truncatechars:100 }}</p>
+
+            <div class="mt-auto d-flex justify-content-between">
+              <!-- Botón Registrarme -->
+              <button type="button" class="btn btn-sm btn-outline-success"
+                onclick="abrirModalRegistro('{{ evento.id }}', '{{ evento.titulo }}')">
+                <i class="bi bi-person-check me-1"></i>Registrarme
+              </button>
+
+              <!-- Botón Ver detalles -->
+              <button type="button" class="btn btn-sm btn-outline-success"
+                data-bs-toggle="modal"
+                data-bs-target="#modalEvento{{ evento.id }}"
+                data-ubicacion="{{ evento.ubicacion|escapejs }}">
+                <i class="bi bi-eye me-1"></i>Ver detalles
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🔽 Modal de detalles del evento -->
+              <div class="modal fade" id="modalEvento{{ evento.id }}" tabindex="-1"
+            aria-labelledby="modalEventoLabel{{ evento.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered"> <!-- centramos verticalmente -->
+              <div class="modal-content shadow rounded-3">
+                <div class="modal-header bg-primary text-white">
+                  <h5 class="modal-title " id="modalEventoLabel{{ evento.id }}">
+                    <i class="bi bi-calendar-event me-2"></i> {{ evento.titulo }}
+                  </h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                  <p><i class="bi bi-card-text me-2 text-primary"></i><strong>Descripción:</strong> {{ evento.descripcion }}</p>
+                  <p><i class="bi bi-clock me-2 text-primary"></i><strong>Fecha:</strong> {{ evento.fecha|date:"d M Y H:i" }}</p>
+                  <p><i class="bi bi-geo-alt me-2 text-primary"></i><strong>Ubicación:</strong> {{ evento.ubicacion }}</p>
+
+                  <hr>
+
+                  <div id="climaEvento{{ evento.id }}" class="d-flex align-items-center">
+                    <i class="bi bi-cloud-sun me-2 fs-4 text-info"></i>
+                    <span>Cargando clima...</span>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Cerrar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+    {% empty %}
+      <p class="text-center">No hay eventos disponibles.</p>
+    {% endfor %}
+  </div>
+</div>
+
+          <!-- 🔽 Modal para registro público (solo una vez, fuera del loop) -->
+          <div class="modal fade" id="modalRegistrar" tabindex="-1" aria-labelledby="modalRegistrarLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <form id="formRegistroEvento">
+                  <div class="modal-header bg-success text-white py-3 px-4">
+                    <h5 class="modal-title mb-0" id="modalRegistrarLabel">
+                      <i class="bi bi-pencil-square me-2"></i> Registro al Evento
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                  </div>
+
+
+                  <div class="modal-body">
+                    <input type="hidden" id="eventoId">
+                    
+                    <!-- 📌 Título del evento (dinámico) -->
+                    <div class="mb-3">
+                      <p class="mb-0 text-muted small">Estás registrándote a:</p>
+                      <h6 id="nombreEvento" class="fw-bold text-success">Nombre del evento</h6>
+                    </div>
+
+                    <!-- 🧑 Nombre -->
+                    <div class="mb-3">
+                      <label for="nombre" class="form-label">Nombre completo</label>
+                      <input type="text" class="form-control" id="nombre" placeholder="Ej: Juan Pérez" required>
+                    </div>
+
+                    <!-- 📧 Correo -->
+                    <div class="mb-3">
+                      <label for="correo" class="form-label">Correo electrónico</label>
+                      <input type="email" class="form-control" id="correo" placeholder="Ej: juan@example.com" required>
+                    </div>
+
+                    <!-- ✅ Mensaje de éxito/error -->
+                    <div id="mensajeRegistro" class="alert d-none mt-3" role="alert"></div>
+                  </div>
+
+                  <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">
+                      <i class="bi bi-check-circle me-1"></i> Registrarme
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                      <i class="bi bi-x-circle me-1"></i> Cancelar
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+
+
+
+{% endblock %}
+
+
+
+
+
+{% block scripts %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.10/css/weather-icons.min.css">
+<script>
+      function abrirModalRegistro(eventoId, titulo) {
+      const modal = new bootstrap.Modal(document.getElementById('modalRegistrar'));
+      
+      // Setear valores
+      document.getElementById('eventoId').value = eventoId;
+      document.getElementById('nombreEvento').textContent = titulo;
+
+      // Resetear formulario y mensaje
+      document.getElementById('formRegistroEvento').reset();
+      const mensaje = document.getElementById('mensajeRegistro');
+      mensaje.classList.add('d-none');
+      mensaje.textContent = '';
+
+      modal.show();
+    }
+
+
+  // Manejar envío del formulario
+  document.getElementById('formRegistroEvento').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const eventoId = document.getElementById('eventoId').value;
+    const nombre = document.getElementById('nombre').value;
+    const correo = document.getElementById('correo').value;
+    const mensaje = document.getElementById('mensajeRegistro');
+
+    fetch(`/eventos/${eventoId}/registrar_publico/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCookie('csrftoken'),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ nombre, correo })
+    })
+    .then(res => res.json())
+    .then(data => {
+      mensaje.classList.remove('d-none');
+      if(data.status === 'success') {
+        mensaje.classList.remove('alert-danger');
+        mensaje.classList.add('alert-success');
+        mensaje.textContent = data.message;
+      } else {
+        mensaje.classList.remove('alert-success');
+        mensaje.classList.add('alert-danger');
+        mensaje.textContent = data.message;
+      }
+    })
+    .catch(() => {
+      mensaje.classList.remove('d-none');
+      mensaje.classList.remove('alert-success');
+      mensaje.classList.add('alert-danger');
+      mensaje.textContent = 'Error al enviar el registro.';
+    });
+  });
+
+  // Función para obtener cookie csrf
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  // Función para ver detalle de evento (opcional)
+  function verDetalleEvento(eventoId) {
+    window.location.href = `/eventos/${eventoId}/detalle/`;
+  }
+
+
+//modal detalles y clima
+
+  // ✅ Cargar clima con ícono, descripción y temperatura
+  function cargarClima(eventoId, ubicacion) {
+    const climaDiv = document.getElementById('climaEvento' + eventoId);
+    climaDiv.innerHTML = 'Cargando clima...';
+
+    fetch(`/api/clima/?ubicacion=${encodeURIComponent(ubicacion)}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          climaDiv.innerHTML = '<p>No se pudo obtener el clima.</p>';
+        } else {
+          climaDiv.innerHTML = `
+              <div class="text-center">
+                <i class="wi ${data.icono}" style="font-size: 3rem;"></i>
+                <p class="mb-1 mt-2"><strong>${data.descripcion}</strong></p>
+                <p class="mb-0">🌡️ <strong>${data.temperatura}°C</strong></p>
+              </div>
+            `;
+
+        }
+      })
+      .catch(() => {
+        climaDiv.innerHTML = '<p>Error al cargar el clima.</p>';
+      });
+  }
+
+  // ✅ Cargar clima cuando se abra el modal
+  document.querySelectorAll('[data-bs-toggle="modal"]').forEach(button => {
+    button.addEventListener('click', () => {
+      const eventoId = button.getAttribute('data-bs-target').replace('#modalEvento', '');
+      const ubicacion = button.getAttribute('data-ubicacion');
+      cargarClima(eventoId, ubicacion);
+    });
+  });
+  
+
+
+
+</script>
+{% endblock %}
+

@@ -1,0 +1,235 @@
+/* estilos.css */
+
+form {
+  margin: 0 auto;
+  padding: 0; /* lo quitamos porque lo maneja .card-body */
+  background: none; /* lo maneja .card-body */
+  border-radius: 0; /* ya lo tiene .card */
+  box-shadow: none; /* ya lo maneja .card */
+}
+
+form input.form-control,
+form textarea.form-control {
+  height: auto;
+  font-size: 1rem;
+  padding: 6px 12px;
+  border-radius: 5px;
+  border: 1px solid #ced4da;
+  transition: border-color 0.3s ease;
+}
+
+form input.form-control:focus,
+form textarea.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 5px rgba(13,110,253,0.5);
+  outline: none;
+}
+
+form button.btn-primary {
+  padding: 10px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 5px;
+  margin-top: 15px;
+  transition: background-color 0.3s ease;
+}
+
+form button.btn-primary:hover {
+  background-color: #0b5ed7;
+}
+
+.card-title {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.btn {
+    border-radius: 6px;
+}
+
+#carouselEventos .carousel-item img {
+  width: 100%;
+  height: auto;          /* Altura automática para mantener proporción */
+  object-fit: contain;   /* La imagen entra completa sin recortes */
+  max-height: 600px;     /* Limita la altura máxima para que no quede gigante */
+  margin: 0 auto;        /* Centra la imagen horizontalmente */
+  display: block;
+}
+
+#carouselEventos .carousel-item img {
+  width: 100%;
+  height: 600px; /* bajá esto según necesites */
+  object-fit: cover;
+}
+
+
+/*menu*/
+.navbar.menu-custom {
+  background-color: #f8f9fa; /* gris muy claro */
+  padding: 10px 0;
+}
+
+.navbar.menu-custom .navbar-nav {
+  height: 60px; /* altura fija del menú */
+}
+
+.navbar.menu-custom .nav-item {
+  height: 100%; /* que cada item ocupe toda la altura */
+}
+
+.navbar.menu-custom .nav-link {
+  color: #006341;
+  font-weight: 600;
+  height: 100%;            /* ocupa toda la altura del li */
+  display: flex;           /* flex para centrar verticalmente */
+  align-items: center;     /* centrado vertical */
+  padding: 0 20px;         /* padding horizontal para espacio */
+  letter-spacing: 0.12em;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  border-radius: 0;        /* sin bordes redondeados */
+}
+
+.navbar.menu-custom .nav-item:hover .nav-link,
+.navbar.menu-custom .nav-link.active {
+  color: #004d29;
+  background-color: #d1d5db; /* gris más oscuro en hover */
+  text-decoration: none;
+}
+
+
+
+
+
+.modal-header {
+  
+  width: fit-content;
+  margin: auto;
+  margin-top: 25px !important;
+}
+
+
+
+.modal-content {
+  border-radius: 1rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  border-bottom: none;
+}
+
+.modal-body p {
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.modal-footer {
+  border-top: none;
+}
+
+.navbar.mb-4 {
+  margin-bottom: 0 !important;
+}
+
+/* 🎨 Estilos para las cards de eventos */
+.card-evento {
+  border-radius: 12px;
+  overflow: hidden; /* Asegura que la imagen respete el borde redondeado */
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-evento:hover {
+  background-color: #000; /* Fondo negro al hacer hover */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); /* Sombra más fuerte */
+}
+
+.card-evento img {
+  width: 100%;
+  height: auto;
+  transition: filter 0.3s ease;
+}
+
+.card-evento:hover img {
+  filter: brightness(0.6); /* Oscurece la imagen */
+}
+
+/* 📝 Título blanco al hacer hover */
+.card-evento:hover .card-title {
+  color: #fff;
+}
+
+/* 📎 Texto también puede ponerse claro si quieres */
+.card-evento:hover .card-text {
+  color: #e0e0e0;
+}
+
+/* 🟢 Botones más notorios en hover */
+.card-evento:hover .btn-outline-success {
+  background-color: #198754;
+  color: #fff;
+  border-color: #198754;
+  transition: all 0.3s ease;
+}
+
+/* Navbar fija arriba con sombra sutil */
+.navbar {
+  background-color: #006341; /* Verde profesional */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); /* Sombra inferior suave */
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+/* Marca del sitio (título izquierdo) con logo */
+.navbar-brand {
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: #ffffff !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Logo dentro de la navbar */
+.navbar-brand img {
+  height: 36px;
+  width: auto;
+}
+
+/* Enlaces de navegación */
+.navbar-nav .nav-link {
+  color: #ffffff;
+  transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+/* Hover en enlaces */
+.navbar-nav .nav-link:hover {
+  color: #e0ffe0; /* Verde claro */
+  text-decoration: underline;
+}
+
+/* Botón "Cerrar sesión" personalizado */
+.navbar .btn-link.nav-link {
+  color: #ffffff;
+}
+
+.navbar .btn-link.nav-link:hover {
+  color: #e0ffe0;
+  text-decoration: underline;
+}
+
+/* En pantallas pequeñas: espaciado entre elementos del menú */
+@media (max-width: 991px) {
+  .navbar-nav .nav-item {
+    margin-bottom: 0.5rem;
+  }
+}
+
+

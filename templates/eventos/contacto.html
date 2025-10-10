@@ -1,0 +1,30 @@
+{% extends 'eventos/base.html' %}
+{% block title %}Contacto{% endblock %}
+
+{% block content %}
+<div class="container my-5 d-flex justify-content-center">
+  <div class="card shadow p-4" style="max-width: 600px; width: 100%;">
+    <h2 class="mb-4 text-center">Contacto</h2>
+    <p class="text-center text-secondary mb-4">
+      Para cualquier duda o sugerencia, contáctanos a través de los siguientes medios:
+    </p>
+    <ul class="list-group list-group-flush mb-4">
+      <li class="list-group-item d-flex align-items-center">
+        <i class="bi bi-envelope-fill me-3 text-primary"></i>
+        <strong>Email:</strong> contacto@eventosacademicos.com
+      </li>
+      <li class="list-group-item d-flex align-items-center">
+        <i class="bi bi-telephone-fill me-3 text-primary"></i>
+        <strong>Teléfono:</strong> +54 9 11 1234 5678
+      </li>
+      <li class="list-group-item d-flex align-items-center">
+        <i class="bi bi-share-fill me-3 text-primary"></i>
+        <strong>Redes Sociales:</strong>
+        <a href="#" target="_blank" class="ms-2">Facebook</a> | 
+        <a href="#" target="_blank" class="ms-2">Twitter</a> | 
+        <a href="#" target="_blank" class="ms-2">Instagram</a>
+      </li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,184 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Eventos Académicos{% endblock %}</title>
+    
+
+    <!-- Bootstrap CSS desde CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap Icons CSS (para los íconos como Facebook, Twitter, etc.) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Tu CSS propio -->
+    <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+<!-- iconos-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.10/css/weather-icons.min.css">
+
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+   <nav class="navbar navbar-expand-lg  mb-4">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{% url 'lista_eventos' %}">
+      <img src="{% static 'img/logo.png' %}" alt="Logo">Eventos Académicos</a>
+    <!-- Botón toggler para pantallas pequeñas -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" 
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+      <ul class="navbar-nav">
+        {% if user.is_authenticated %}
+          <li class="nav-item">
+            <span class="nav-link">Hola, <strong>{{ user.username }}</strong></span>
+          </li>
+          <li class="nav-item">
+            <form method="POST" action="{% url 'logout' %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-link nav-link" style="display:inline; padding:0; border:none; background:none;">
+                Cerrar sesión
+              </button>
+              <input type="hidden" name="next" value="/accounts/login/">
+            </form>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'registro' %}">Registrarse</a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Carrusel Bootstrap -->
+      <div id="carouselEventos" class="carousel slide" data-bs-ride="carousel" data-bs-interval="2000">
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img src="{% static 'img/evento1.jpg' %}" class="d-block w-100" alt="Evento 1">
+            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
+  
+            </div>
+          </div>
+          <div class="carousel-item">
+            <img src="{% static 'img/evento2.jpg' %}" class="d-block w-100" alt="Evento 2">
+            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
+              
+            </div>
+          </div>
+          <div class="carousel-item">
+            <img src="{% static 'img/evento3.jpg' %}" class="d-block w-100" alt="Evento 3">
+            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
+             
+            </div>
+          </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselEventos" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Anterior</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselEventos" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Siguiente</span>
+        </button>
+      </div>
+
+      <!-- Bootstrap JS (opcional, para componentes interactivos) -->
+        <nav class="navbar navbar-expand-lg menu-custom">
+          <div class="container justify-content-center">
+            <ul class="navbar-nav flex-row">
+              <li class="nav-item mx-3">
+                <a class="nav-link active" href="{% url 'lista_eventos' %}">Inicio</a>
+              </li>
+             <li class="nav-item mx-3">
+                <a class="nav-link" href="{% url 'contacto' %}">Contacto</a>
+              </li>
+              <li class="nav-item mx-3">
+                <a class="nav-link" href="{% url 'acerca' %}">Acerca de</a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+
+
+
+
+    <div class="container mt-5">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Bootstrap JS (opcional, para componentes interactivos) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+
+ <footer class="bg-dark text-light pt-5 pb-4 mt-5">
+  <div class="container text-center text-md-start">
+    <div class="row text-center text-md-start">
+      
+      <!-- Columna 1: Logo o Título -->
+      <div class="col-md-3 col-lg-3 col-xl-3 mx-auto mt-3">
+        <h5 class="text-uppercase mb-4 font-weight-bold text-success">Eventos Académicos</h5>
+        <p>Una plataforma para la gestión y visualización de eventos académicos, diseñada para estudiantes y organizadores.</p>
+      </div>
+
+      <!-- Columna 2: Menú -->
+      <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mt-3">
+        <h5 class="text-uppercase mb-4 font-weight-bold text-success">Navegación</h5>
+        <p><a href="{% url 'lista_eventos' %}" class="text-light text-decoration-none">Inicio</a></p>
+        <p><a href="#" class="text-light text-decoration-none">Contacto</a></p>
+        <p><a href="#" class="text-light text-decoration-none">Acerca de</a></p>
+      </div>
+
+      <!-- Columna 3: Información de contacto -->
+      <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mt-3">
+        <h5 class="text-uppercase mb-4 font-weight-bold text-success">Contacto</h5>
+        <p><i class="bi bi-envelope-fill me-2"></i> eventos@gamil.com</p>
+        <p><i class="bi bi-geo-alt-fill me-2"></i> Guayauil, Ecuador</p>
+        <p><i class="bi bi-telephone-fill me-2"></i> +593 987456123</p>
+      </div>
+    </div>
+
+    <hr class="my-3 text-white" />
+
+    <!-- Footer inferior -->
+    <div class="container text-center">
+    <!-- Redes sociales -->
+    <div class="mb-3">
+      <a href="#" class="text-white me-3">
+        <i class="bi bi-facebook fs-4"></i>
+      </a>
+      <a href="#" class="text-white me-3">
+        <i class="bi bi-twitter-x fs-4"></i>
+      </a>
+      <a href="#" class="text-white me-3">
+        <i class="bi bi-instagram fs-4"></i>
+      </a>
+      <a href="#" class="text-white">
+        <i class="bi bi-envelope fs-4"></i>
+      </a>
+    </div>
+
+    <!-- Texto de derechos -->
+    <p class="mb-0">
+      © 2025 <strong>Eventos Académicos</strong> | Todos los derechos reservados.
+    </p>
+  </div>
+</footer>
+  <a href="#" class="btn btn-primary rounded-circle position-fixed" style="bottom: 20px; right: 20px; z-index: 1000;">
+  <i class="bi bi-arrow-up"></i>
+</a>
+</body>
+</html>
+

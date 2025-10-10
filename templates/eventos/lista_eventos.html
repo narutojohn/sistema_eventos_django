@@ -1,0 +1,202 @@
+{% extends 'eventos/base.html' %}
+{% load custom_filters %}
+  
+{% block title %}Mis Eventos{% endblock %}
+
+{% block content %}
+<h2 class="text-center mt-4 mb-4">Mis Eventos</h2>
+
+<div class="text-end mb-3">
+    <a href="{% url 'crear_evento' %}" class="btn btn-success">
+        ➕ Crear nuevo evento
+    </a>
+</div>
+
+{% if eventos %}
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for evento in eventos %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+
+                  {% if evento.imagen %}
+                    <img src="{{ evento.imagen.url }}" class="card-img-top" alt="Imagen de {{ evento.titulo }}">
+                  {% endif %}
+
+                    <div class="card-body">
+                        <h5 class="card-title">{{ evento.titulo }}</h5>
+                        <p class="card-text">{{ evento.descripcion }}</p>
+                        <p class="card-text">
+                            📅 <strong>Fecha:</strong> {{ evento.fecha|date:"d M Y H:i" }}<br>
+                            📍 <strong>Ubicación:</strong> {{ evento.ubicacion }}
+                        </p>
+                        <div class="d-flex justify-content-between mt-3">
+                            <a href="{% url 'editar_evento' evento.id %}" class="btn btn-sm btn-outline-primary">✏️ Editar</a>
+
+                            <!-- Botón para abrir modal eliminar -->
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalEliminar{{ evento.id }}">
+                                🗑️ Eliminar
+                            </button>
+
+                            <!-- Botón para abrir modal clima -->
+                           <button  type="button" class="btn btn-sm btn-outline-info"  onclick="cargarClima('{{ evento.ubicacion|escapejs }}')"  data-bs-toggle="modal" data-bs-target="#modalClima">
+                                ☁️ Clima
+                           </button>   
+
+                           <p><strong>Registrados públicamente:</strong> {{ registros_por_evento|get_item:evento.id|length }}</p>
+
+                          <!-- Botón para abrir modal registros -->
+                          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalRegistros{{ evento.id }}">
+                            Ver registros
+                          </button>
+                                 
+                          </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal para confirmar eliminación -->
+            <div class="modal fade" id="modalEliminar{{ evento.id }}" tabindex="-1" aria-labelledby="modalLabel{{ evento.id }}" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="modalLabel{{ evento.id }}">¿Eliminar evento?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                  </div>
+                  <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar <strong>{{ evento.titulo }}</strong>? Esta acción no se puede deshacer.
+                  </div>
+                  <div class="modal-footer">
+                    <form method="POST" action="{% url 'eliminar_evento' evento.id %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+                    </form>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Modal para mostrar registros públicos -->
+        <div class="modal fade" id="modalRegistros{{ evento.id }}" tabindex="-1" aria-labelledby="modalRegistrosLabel{{ evento.id }}" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="modalRegistrosLabel{{ evento.id }}">Registros Públicos - {{ evento.titulo }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+              </div>
+              <div class="modal-body">
+                {% with registros=registros_por_evento|get_item:evento.id %}
+                  {% if registros %}
+                    <ul class="list-group">
+                      {% for registro in registros %}
+                        <li class="list-group-item">
+                          {{ registro.nombre }} - {{ registro.correo }}<br>
+                          <small class="text-muted">Registrado el {{ registro.fecha_registro|date:"d M Y H:i" }}</small>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  {% else %}
+                    <p>No hay registros públicos para este evento.</p>
+                  {% endif %}
+                {% endwith %}
+
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+                   
+
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info text-center">
+        No tienes eventos creados aún.
+    </div>
+{% endif %}
+
+          <!-- Modal general para mostrar clima -->
+          <div class="modal fade" id="modalClima" tabindex="-1" aria-labelledby="modalClimaLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                  <h5 class="modal-title" id="modalClimaLabel">Clima del Evento</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body" id="contenidoClima">
+                  Aquí se mostrará la información del clima.
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+                  
+
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function cargarClima(ubicacion) {
+    const contenido = document.getElementById("contenidoClima");
+    contenido.innerHTML = `
+      <div class="text-center">
+        <div class="spinner-border text-info" role="status"></div>
+        <p class="mt-2">Consultando clima para <strong>${ubicacion}</strong>...</p>
+      </div>
+    `;
+
+    fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(ubicacion)}&count=1`)
+      .then(response => response.json())
+      .then(data => {
+        if (!data.results || data.results.length === 0) {
+          contenido.innerHTML = `<div class="alert alert-warning">No se pudo encontrar la ubicación: <strong>${ubicacion}</strong>.</div>`;
+          return;
+        }
+
+        const { latitude, longitude } = data.results[0];
+
+        return fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (!data.current_weather) {
+          contenido.innerHTML = `<div class="alert alert-warning">No se pudo obtener el clima.</div>`;
+          return;
+        }
+
+        const clima = data.current_weather;
+
+        // Formatear hora legible
+        const fecha = new Date(clima.time);
+        const fechaFormateada = fecha.toLocaleString('es-ES', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        contenido.innerHTML = `
+          <ul class="list-group">
+            <li class="list-group-item"><strong>Temperatura:</strong> ${clima.temperature} °C</li>
+            <li class="list-group-item"><strong>Viento:</strong> ${clima.windspeed} km/h</li>
+            <li class="list-group-item"><strong>Dirección del viento:</strong> ${clima.winddirection}°</li>
+            <li class="list-group-item"><strong>Hora:</strong> ${fechaFormateada}</li>
+          </ul>
+        `;
+      })
+      .catch(error => {
+        console.error("Error al obtener clima:", error);
+        contenido.innerHTML = `<div class="alert alert-danger">Ocurrió un error al consultar el clima.</div>`;
+      });
+}
+
+</script>
+
+{% endblock %}

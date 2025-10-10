@@ -1,0 +1,33 @@
+{% extends 'eventos/base.html' %}
+{% block title %}Editar Evento{% endblock %}
+
+{% block content %}
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-lg">
+            <div class="card-header bg-gradient bg-warning text-dark">
+                <h4 class="mb-0">✏️ Editar evento</h4>
+            </div>
+            <div class="card-body bg-light">
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="text-danger small">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-success">💾 Guardar cambios</button>
+                        <a href="{% url 'lista_eventos' %}" class="btn btn-secondary">↩️ Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
