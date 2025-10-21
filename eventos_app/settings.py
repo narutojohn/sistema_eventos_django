@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'eventos',  # 👈 Tu app personalizada debe ir aquí
+    'rest_framework',
 ]
 
 # Middleware
@@ -111,3 +112,10 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'jfortiz@tes.edu.ec'  # Cambia por tu correo real
 EMAIL_HOST_PASSWORD = 'hkvbymtxwureyhzg'  # Cambia por tu contraseña o token
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# Configuración de JWT para autenticación
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}

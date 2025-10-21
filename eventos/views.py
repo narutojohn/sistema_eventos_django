@@ -17,6 +17,10 @@ import json
 from django.core.mail import send_mail
 from django.conf import settings
 from .models import RegistroPublico
+from django.contrib.auth.decorators import user_passes_test
+from rest_framework import generics, permissions
+from .serializers import EventoSerializer
+
 
 def registro(request):
     if request.method == 'POST':
@@ -28,15 +32,32 @@ def registro(request):
     else:
         form = RegistroUsuarioForm()
     return render(request, 'registration/register.html', {'form': form})
+
 @login_required
 def lista_eventos(request):
-    eventos = Evento.objects.filter(creador=request.user).prefetch_related('registros_publicos')
+    eventos = Evento.objects.all().prefetch_related('registros_publicos')
+
+    registros_por_evento = {}
+    for evento in eventos:
+        registros_por_evento[evento.id] = list(evento.registros_publicos.all())
 
     return render(request, 'eventos/lista_eventos.html', {
         'eventos': eventos,
+        'registros_por_evento': registros_por_evento,
     })
 
+
+
+def acceso_denegado(request):
+    return render(request, 'eventos/acceso_denegado.html', {'mensaje': 'No tienes permisos para acceder a esta sección.'})
+
+def es_organizador(user):
+   return user.is_authenticated and user.groups.filter(name='Organizadores').exists()
+
+
+
 @login_required
+@user_passes_test(es_organizador, login_url='acceso_denegado')
 def crear_evento(request):
     if request.method == 'POST':
         form = EventoForm(request.POST,  request.FILES)
@@ -49,9 +70,11 @@ def crear_evento(request):
         form = EventoForm()
     return render(request, 'eventos/crear_evento.html', {'form': form})
 
+
 @login_required
+@user_passes_test(es_organizador, login_url='acceso_denegado')
 def editar_evento(request, evento_id):
-    evento = get_object_or_404(Evento, id=evento_id, creador=request.user)
+    evento = get_object_or_404(Evento, id=evento_id)
     if request.method == 'POST':
         form = EventoForm(request.POST, instance=evento)
         if form.is_valid():
@@ -61,9 +84,11 @@ def editar_evento(request, evento_id):
         form = EventoForm(instance=evento)
     return render(request, 'eventos/editar_evento.html', {'form': form})
 
+
 @login_required
+@user_passes_test(es_organizador, login_url='acceso_denegado')
 def eliminar_evento(request, evento_id):
-    evento = get_object_or_404(Evento, id=evento_id, creador=request.user)
+    evento = get_object_or_404(Evento, id=evento_id)
     if request.method == 'POST':
         evento.delete()
         return redirect('lista_eventos')
@@ -173,8 +198,7 @@ def registrar_usuario_evento_publico(request, evento_id):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': 'Error al procesar el registro.'})
     
-from django.http import JsonResponse
-import requests
+
 
 def api_clima(request):
     ubicacion = request.GET.get('ubicacion')
@@ -247,3 +271,134 @@ def contacto(request):
 
 def acerca(request):
     return render(request, 'eventos/acerca.html')
+
+from rest_framework import permissions
+
+class EventoListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Evento.objects.all()
+    serializer_class = EventoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(creador=self.request.user)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        eventos_data = serializer.data
+
+        eventos_con_clima = []
+        for evento, data in zip(queryset, eventos_data):
+            clima = self.obtener_clima_para_ubicacion(evento.ubicacion)
+            data['clima'] = clima
+            eventos_con_clima.append(data)
+
+        return JsonResponse(eventos_con_clima, safe=False)
+
+    def obtener_clima_para_ubicacion(self, ubicacion):
+        try:
+            geocoding_url = "https://nominatim.openstreetmap.org/search"
+            params = {'q': ubicacion, 'format': 'json'}
+            georesp = requests.get(geocoding_url, params=params, headers={'User-Agent': 'eventos-app'})
+            geodata = georesp.json()
+
+            if not geodata:
+                return {'error': 'No se encontraron coordenadas'}
+
+            lat = geodata[0]['lat']
+            lon = geodata[0]['lon']
+
+            weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true"
+            weather_resp = requests.get(weather_url)
+            weather_data = weather_resp.json()
+            current_weather = weather_data.get('current_weather')
+
+            if not current_weather:
+                return {'error': 'No se pudo obtener el clima'}
+
+            return {
+                'temperatura': current_weather.get('temperature'),
+                'descripcion': self.descripcion_clima(current_weather.get('weathercode'))
+            }
+
+        except Exception as e:
+            return {'error': 'Error al obtener clima'}
+
+    def descripcion_clima(self, weather_code):
+        weather_map = {
+            0: "Despejado",
+            1: "Mayormente despejado",
+            2: "Parcialmente nublado",
+            3: "Nublado",
+            45: "Niebla",
+            48: "Niebla con escarcha",
+            51: "Llovizna ligera",
+            53: "Llovizna moderada",
+            55: "Llovizna intensa",
+            61: "Lluvia ligera",
+            63: "Lluvia moderada",
+            65: "Lluvia fuerte",
+            71: "Nieve ligera",
+            73: "Nieve moderada",
+            75: "Nieve intensa",
+            95: "Tormenta",
+            96: "Tormenta con granizo",
+            99: "Tormenta severa"
+        }
+        return weather_map.get(weather_code, "Clima desconocido")
+
+class EventoDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Evento.objects.all()
+    serializer_class = EventoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+
+        clima = self.obtener_clima_para_ubicacion(instance.ubicacion)
+        data['clima'] = clima
+
+        return JsonResponse(data)
+
+    def obtener_clima_para_ubicacion(self, ubicacion):
+        try:
+            geocoding_url = "https://nominatim.openstreetmap.org/search"
+            params = {'q': ubicacion, 'format': 'json'}
+            georesp = requests.get(geocoding_url, params=params, headers={'User-Agent': 'eventos-app'})
+            geodata = georesp.json()
+
+            if not geodata:
+                return {'error': 'No se encontraron coordenadas'}
+
+            lat = geodata[0]['lat']
+            lon = geodata[0]['lon']
+
+            weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true"
+            weather_resp = requests.get(weather_url)
+            weather_data = weather_resp.json()
+            current_weather = weather_data.get('current_weather')
+
+            if not current_weather:
+                return {'error': 'No se pudo obtener el clima'}
+
+            return {
+                'temperatura': current_weather.get('temperature'),
+                'descripcion': self.descripcion_clima(current_weather.get('weathercode'))
+            }
+
+        except Exception:
+            return {'error': 'Error al obtener clima'}
+
+    def descripcion_clima(self, weather_code):
+        weather_map = {
+            0: "Despejado", 1: "Mayormente despejado", 2: "Parcialmente nublado", 3: "Nublado",
+            45: "Niebla", 48: "Niebla con escarcha", 51: "Llovizna ligera", 53: "Llovizna moderada",
+            55: "Llovizna intensa", 61: "Lluvia ligera", 63: "Lluvia moderada", 65: "Lluvia fuerte",
+            71: "Nieve ligera", 73: "Nieve moderada", 75: "Nieve intensa", 95: "Tormenta",
+            96: "Tormenta con granizo", 99: "Tormenta severa"
+        }
+        return weather_map.get(weather_code, "Clima desconocido")
+
+    

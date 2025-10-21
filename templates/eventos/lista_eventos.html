@@ -29,7 +29,7 @@
                             📅 <strong>Fecha:</strong> {{ evento.fecha|date:"d M Y H:i" }}<br>
                             📍 <strong>Ubicación:</strong> {{ evento.ubicacion }}
                         </p>
-                        <div class="d-flex justify-content-between mt-3">
+                          <div class="d-flex flex-wrap justify-content-start gap-2 mt-3 botones-evento">
                             <a href="{% url 'editar_evento' evento.id %}" class="btn btn-sm btn-outline-primary">✏️ Editar</a>
 
                             <!-- Botón para abrir modal eliminar -->
@@ -44,10 +44,10 @@
 
                            <p><strong>Registrados públicamente:</strong> {{ registros_por_evento|get_item:evento.id|length }}</p>
 
-                          <!-- Botón para abrir modal registros -->
-                          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalRegistros{{ evento.id }}">
-                            Ver registros
-                          </button>
+                            <!-- Botón para abrir modal registros -->
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalRegistros{{ evento.id }}">
+                              Ver registros
+                            </button>
                                  
                           </div>
                     </div>

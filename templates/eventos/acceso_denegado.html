@@ -1,0 +1,12 @@
+{% extends 'eventos/base.html' %}
+{% block title %}Acceso Denegado{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="alert alert-danger text-center">
+    <h2>🚫 Acceso Denegado</h2>
+    <p>No tienes permisos para acceder a esta sección.</p>
+    <a href="{% url 'lista_eventos' %}" class="btn btn-outline-primary mt-3">Volver a eventos</a>
+  </div>
+</div>
+{% endblock %}

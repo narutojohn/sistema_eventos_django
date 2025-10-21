@@ -232,4 +232,9 @@ form button.btn-primary:hover {
   }
 }
 
-
+.botones-evento .btn {
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  flex-grow: 0;
+  white-space: nowrap;
+}
